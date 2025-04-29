@@ -1,0 +1,1 @@
+npm run web(inicia o server web)
