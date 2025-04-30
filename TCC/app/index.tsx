@@ -1,14 +1,15 @@
-import { Link } from 'expo-router';
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-export default function HomeScreen() {
+export default function Index() {
   return (
-    <View>
-        <center>
-      <Text>Bem-vindo!</Text>
-      <br />
-      <Link href="/sobre">Ir para Sobre</Link>
-      </center>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text>Edit app/index.tsx to edit this screen.</Text>
     </View>
   );
 }
