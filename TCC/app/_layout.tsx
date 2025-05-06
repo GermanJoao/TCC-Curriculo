@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 
+
 export default function Layout() {
   return (
     <Tabs
@@ -44,24 +45,33 @@ export default function Layout() {
                 break;
             }
           
+            const circleSize = focused ? 65 : 55;
+            const iconSize = focused ? 40 : 22;
+          
             return (
               <View
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  backgroundColor: focused ? '#fff' : '#FFD560',
+                  width: circleSize,
+                  height: circleSize,
+                  borderRadius: circleSize / 2,
+                  backgroundColor: focused ? '#FFFFFF' : '#FFD560',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginTop: 30,
-
+                  shadowColor: '#000',
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: focused ? 0.25 : 0,
+                  shadowRadius: 4,
+                  elevation: focused ? 5 : 0, // Android
                 }}
               >
-                <Ionicons name={iconName} size={24} color="#000" />
+                <Ionicons name={iconName} size={iconSize} color="#000" />
               </View>
             );
-          }
-          ,
+          },
       })}
     >
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
