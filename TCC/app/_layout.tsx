@@ -28,7 +28,7 @@ export default function Layout() {
           justifyContent: 'space-between',
         },
         tabBarIcon: ({ color, size, focused }) => {
-            let iconName = 'home';
+            let iconName = '';
           
             switch (route.name) {
               case 'index':

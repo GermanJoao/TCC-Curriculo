@@ -1,9 +1,13 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import TopTabHeader from '../components/_TopTabHeader'; // ajuste o caminho se necessário
 
-export default function AjustesScreen() {
+export default function ajustesScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Página ajustes</Text>
+    <View style={{ flex: 1, backgroundColor: '#0B0801' }}>
+      <TopTabHeader />
+      {
+      /* conteúdo da tela */
+      }
     </View>
   );
 }
