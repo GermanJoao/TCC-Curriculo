@@ -1,48 +1,66 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function FormularioCurriculo() {
-  const router = useRouter();
-
   const [nome, setNome] = useState('');
   const [idade, setIdade] = useState('');
-  const [email, setEmail] = useState('');
-  const [contato, setContato] = useState('');
   const [excelencia, setExcelencia] = useState('');
   const [estudando, setEstudando] = useState('');
+  const [contato, setContato] = useState('');
+  const [email, setEmail] = useState('');
   const [objetivo, setObjetivo] = useState('');
-  const [formacao, setFormacao] = useState('');
-  const [experiencia, setExperiencia] = useState('');
-  const [habilidades, setHabilidades] = useState('');
+  const [foto, setFoto] = useState('');
 
-  const salvarCurriculo = () => {
-    // Aqui você pode salvar no AsyncStorage ou Zustand futuramente
-    Alert.alert('Currículo salvo com sucesso!');
-    router.replace('/');
+  const router = useRouter();
+
+  const salvarCurriculo = async () => {
+    const curriculo = {
+      nome,
+      idade,
+      excelencia,
+      estudando,
+      contato,
+      email,
+      objetivo,
+      foto,
+    };
+
+    try {
+      await AsyncStorage.setItem('curriculo', JSON.stringify(curriculo));
+      router.replace('/');
+    } catch (error) {
+      console.error('Erro ao salvar currículo:', error);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.titulo}>Preencha seu Currículo</Text>
 
-      <TextInput placeholder="Nome completo" style={styles.input} value={nome} onChangeText={setNome} />
+      <TextInput placeholder="Nome" style={styles.input} value={nome} onChangeText={setNome} />
       <TextInput placeholder="Idade" style={styles.input} value={idade} onChangeText={setIdade} keyboardType="numeric" />
+      <TextInput placeholder="Área de Excelência" style={styles.input} value={excelencia} onChangeText={setExcelencia} />
+      <TextInput placeholder="Atualmente Estudando" style={styles.input} value={estudando} onChangeText={setEstudando} />
+      <TextInput placeholder="Telefone ou WhatsApp" style={styles.input} value={contato} onChangeText={setContato} keyboardType="phone-pad" />
       <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
-      <TextInput placeholder="Contato (telefone)" style={styles.input} value={contato} onChangeText={setContato} />
-      <TextInput placeholder="Excelência (principal habilidade)" style={styles.input} value={excelencia} onChangeText={setExcelencia} />
-      <TextInput placeholder="Estudando atualmente" style={styles.input} value={estudando} onChangeText={setEstudando} />
-      <TextInput placeholder="Objetivo profissional" style={[styles.input, styles.textArea]} value={objetivo} onChangeText={setObjetivo} multiline />
-      <TextInput placeholder="Formação acadêmica" style={[styles.input, styles.textArea]} value={formacao} onChangeText={setFormacao} multiline />
-      <TextInput placeholder="Experiência profissional" style={[styles.input, styles.textArea]} value={experiencia} onChangeText={setExperiencia} multiline />
-      <TextInput placeholder="Habilidades adicionais" style={[styles.input, styles.textArea]} value={habilidades} onChangeText={setHabilidades} multiline />
+      <TextInput placeholder="Link da Foto de Perfil" style={styles.input} value={foto} onChangeText={setFoto} />
+      <TextInput
+        placeholder="Objetivo profissional"
+        style={[styles.input, styles.textArea]}
+        value={objetivo}
+        onChangeText={setObjetivo}
+        multiline
+        numberOfLines={4}
+      />
 
       <TouchableOpacity style={styles.botaoSalvar} onPress={salvarCurriculo}>
         <Text style={styles.textoBotao}>Salvar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.botaoVoltar} onPress={() => router.back()}>
-        <Text style={styles.textoVoltar}>Voltar</Text>
+        <Text style={styles.textoBotao}>Voltar</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -79,19 +97,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  botaoVoltar: {
+    backgroundColor: '#A020F0',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
   textoBotao: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  botaoVoltar: {
-    backgroundColor: '#444',
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  textoVoltar: {
-    color: '#fff',
-    fontSize: 16,
   },
 });
