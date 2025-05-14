@@ -25,7 +25,6 @@ export default function Layout() {
           shadowOpacity: 0.1,
           shadowOffset: { width: 0, height: 5 },
           shadowRadius: 10,
-          justifyContent: 'space-between',
         },
         tabBarIcon: ({ color, size, focused }) => {
             let iconName = '';
@@ -65,6 +64,7 @@ export default function Layout() {
                   shadowOpacity: focused ? 0.25 : 0,
                   shadowRadius: 4,
                   elevation: focused ? 5 : 0, // Android
+                  marginTop: 30,
                 }}
               >
                 <Ionicons name={iconName} size={iconSize} color="#000" />
