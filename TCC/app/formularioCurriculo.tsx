@@ -1,66 +1,114 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function FormularioCurriculo() {
-  const [nome, setNome] = useState('');
-  const [idade, setIdade] = useState('');
-  const [excelencia, setExcelencia] = useState('');
-  const [estudando, setEstudando] = useState('');
-  const [contato, setContato] = useState('');
-  const [email, setEmail] = useState('');
-  const [objetivo, setObjetivo] = useState('');
-  const [foto, setFoto] = useState('');
-
   const router = useRouter();
+  const { index } = useLocalSearchParams();
+  const parsedIndex = index !== undefined ? parseInt(index as string) : null;
+
+  const [curriculo, setCurriculo] = useState({
+    nome: '',
+    cargo: '',
+    excelencia: '',
+    estudando: '',
+    contato: '',
+    email: '',
+    objetivo: '',
+    experiencias: '',
+    formacao: '',
+    idiomas: '',
+    habilidades: '',
+    redesSociais: '',
+    foto: '',
+  });
+
+  useEffect(() => {
+    const carregarCurriculo = async () => {
+      const salvo = await AsyncStorage.getItem('curriculos');
+      if (salvo) {
+        const lista = JSON.parse(salvo);
+        if (parsedIndex !== null && lista[parsedIndex]) {
+          setCurriculo(lista[parsedIndex]);
+        }
+      }
+    };
+    carregarCurriculo();
+  }, []);
 
   const salvarCurriculo = async () => {
-    const curriculo = {
-      nome,
-      idade,
-      excelencia,
-      estudando,
-      contato,
-      email,
-      objetivo,
-      foto,
-    };
-
     try {
-      await AsyncStorage.setItem('curriculo', JSON.stringify(curriculo));
-      router.replace('/');
+      const salvo = await AsyncStorage.getItem('curriculos');
+      const lista = salvo ? JSON.parse(salvo) : [];
+
+      if (parsedIndex !== null && lista[parsedIndex]) {
+        lista[parsedIndex] = curriculo;
+      } else {
+        lista.push(curriculo);
+      }
+
+      await AsyncStorage.setItem('curriculos', JSON.stringify(lista));
+      router.back();
     } catch (error) {
       console.error('Erro ao salvar currículo:', error);
     }
   };
 
+  const escolherFoto = async () => {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!resultado.canceled && resultado.assets?.[0]?.uri) {
+      setCurriculo({ ...curriculo, foto: resultado.assets[0].uri });
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.titulo}>Preencha seu Currículo</Text>
+      <Text style={styles.titulo}>Currículo</Text>
 
-      <TextInput placeholder="Nome" style={styles.input} value={nome} onChangeText={setNome} />
-      <TextInput placeholder="Idade" style={styles.input} value={idade} onChangeText={setIdade} keyboardType="numeric" />
-      <TextInput placeholder="Área de Excelência" style={styles.input} value={excelencia} onChangeText={setExcelencia} />
-      <TextInput placeholder="Atualmente Estudando" style={styles.input} value={estudando} onChangeText={setEstudando} />
-      <TextInput placeholder="Telefone ou WhatsApp" style={styles.input} value={contato} onChangeText={setContato} keyboardType="phone-pad" />
-      <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
-      <TextInput placeholder="Link da Foto de Perfil" style={styles.input} value={foto} onChangeText={setFoto} />
-      <TextInput
-        placeholder="Objetivo profissional"
-        style={[styles.input, styles.textArea]}
-        value={objetivo}
-        onChangeText={setObjetivo}
-        multiline
-        numberOfLines={4}
-      />
+      <TouchableOpacity style={styles.fotoContainer} onPress={escolherFoto}>
+        {curriculo.foto ? (
+          <Image source={{ uri: curriculo.foto }} style={styles.foto} />
+        ) : (
+          <Text style={styles.textoFoto}>Adicionar Foto</Text>
+        )}
+      </TouchableOpacity>
+
+      {[
+        { label: 'Nome Completo', key: 'nome' },
+        { label: 'Cargo Pretendido', key: 'cargo' },
+        { label: 'Excelência (ex: Front-End Sênior)', key: 'excelencia' },
+        { label: 'Estudando / Áreas de Interesse', key: 'estudando' },
+        { label: 'Contato (Telefone)', key: 'contato' },
+        { label: 'Email', key: 'email' },
+        { label: 'Objetivo Profissional', key: 'objetivo', multiline: true, lines: 3 },
+        { label: 'Experiências Profissionais', key: 'experiencias', multiline: true, lines: 4 },
+        { label: 'Formação Acadêmica', key: 'formacao', multiline: true, lines: 3 },
+        { label: 'Idiomas', key: 'idiomas' },
+        { label: 'Habilidades Técnicas', key: 'habilidades', multiline: true, lines: 2 },
+        { label: 'Redes Sociais (LinkedIn, GitHub, etc)', key: 'redesSociais', multiline: true, lines: 2 },
+      ].map((item, index) => (
+        <TextInput
+          key={index}
+          style={styles.input}
+          placeholder={item.label}
+          placeholderTextColor="#aaa"
+          multiline={item.multiline}
+          numberOfLines={item.lines}
+          value={curriculo[item.key]}
+          onChangeText={(text) => setCurriculo({ ...curriculo, [item.key]: text })}
+        />
+      ))}
 
       <TouchableOpacity style={styles.botaoSalvar} onPress={salvarCurriculo}>
         <Text style={styles.textoBotao}>Salvar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.botaoVoltar} onPress={() => router.back()}>
-        <Text style={styles.textoBotao}>Voltar</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -68,44 +116,53 @@ export default function FormularioCurriculo() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     backgroundColor: '#0B0801',
     flexGrow: 1,
+    padding: 16,
+    alignItems: 'center',
   },
   titulo: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFD700',
     marginBottom: 20,
-    textAlign: 'center',
   },
   input: {
     backgroundColor: '#fff',
+    width: '100%',
     borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 15,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 16,
   },
   botaoSalvar: {
-    backgroundColor: '#FFD700',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  botaoVoltar: {
     backgroundColor: '#A020F0',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    marginTop: 20,
   },
   textoBotao: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  fotoContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#FFD700',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  textoFoto: {
+    color: '#0B0801',
+    fontWeight: 'bold',
+  },
+  foto: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
 });
