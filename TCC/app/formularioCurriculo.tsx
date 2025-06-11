@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Alert,
+} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
@@ -36,7 +45,7 @@ export default function FormularioCurriculo() {
       }
     };
     carregarCurriculo();
-  }, []);
+  }, [parsedIndex]);
 
   const salvarCurriculo = async () => {
     try {
@@ -50,6 +59,7 @@ export default function FormularioCurriculo() {
       }
 
       await AsyncStorage.setItem('curriculos', JSON.stringify(lista));
+      Alert.alert('Sucesso', 'Currículo salvo com sucesso!');
       router.back();
     } catch (error) {
       console.error('Erro ao salvar currículo:', error);
@@ -57,6 +67,12 @@ export default function FormularioCurriculo() {
   };
 
   const escolherFoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permissão para acessar as fotos é necessária.');
+      return;
+    }
+
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -69,8 +85,28 @@ export default function FormularioCurriculo() {
     }
   };
 
+  const campos = [
+    { label: 'Nome Completo', key: 'nome' },
+    { label: 'Cargo Pretendido', key: 'cargo' },
+    { label: 'Excelência (ex: Front-End Sênior)', key: 'excelencia' },
+    { label: 'Estudando / Áreas de Interesse', key: 'estudando' },
+    { label: 'Contato (Telefone)', key: 'contato' },
+    { label: 'Email', key: 'email' },
+    { label: 'Objetivo Profissional', key: 'objetivo', multiline: true, lines: 3 },
+    { label: 'Experiências Profissionais', key: 'experiencias', multiline: true, lines: 4 },
+    { label: 'Formação Acadêmica', key: 'formacao', multiline: true, lines: 3 },
+    { label: 'Idiomas', key: 'idiomas' },
+    { label: 'Habilidades Técnicas', key: 'habilidades', multiline: true, lines: 2 },
+    { label: 'Redes Sociais (LinkedIn, GitHub, etc)', key: 'redesSociais', multiline: true, lines: 2 },
+  ];
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Botão de Voltar */}
+      <TouchableOpacity style={styles.botaoVoltar} onPress={() => router.back()}>
+        <Text style={styles.textoVoltar}>← Voltar</Text>
+      </TouchableOpacity>
+
       <Text style={styles.titulo}>Currículo</Text>
 
       <TouchableOpacity style={styles.fotoContainer} onPress={escolherFoto}>
@@ -81,22 +117,9 @@ export default function FormularioCurriculo() {
         )}
       </TouchableOpacity>
 
-      {[
-        { label: 'Nome Completo', key: 'nome' },
-        { label: 'Cargo Pretendido', key: 'cargo' },
-        { label: 'Excelência (ex: Front-End Sênior)', key: 'excelencia' },
-        { label: 'Estudando / Áreas de Interesse', key: 'estudando' },
-        { label: 'Contato (Telefone)', key: 'contato' },
-        { label: 'Email', key: 'email' },
-        { label: 'Objetivo Profissional', key: 'objetivo', multiline: true, lines: 3 },
-        { label: 'Experiências Profissionais', key: 'experiencias', multiline: true, lines: 4 },
-        { label: 'Formação Acadêmica', key: 'formacao', multiline: true, lines: 3 },
-        { label: 'Idiomas', key: 'idiomas' },
-        { label: 'Habilidades Técnicas', key: 'habilidades', multiline: true, lines: 2 },
-        { label: 'Redes Sociais (LinkedIn, GitHub, etc)', key: 'redesSociais', multiline: true, lines: 2 },
-      ].map((item, index) => (
+      {campos.map((item) => (
         <TextInput
-          key={index}
+          key={item.key}
           style={styles.input}
           placeholder={item.label}
           placeholderTextColor="#aaa"
@@ -164,5 +187,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
+  },
+  botaoVoltar: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  textoVoltar: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
